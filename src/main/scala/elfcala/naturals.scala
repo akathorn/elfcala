@@ -22,6 +22,7 @@ trait Even extends Naturals {
   }                                                              -- "even_s"
 }
 
+
 // Some proofs
 trait PlusZRightNeutral extends Naturals {
   val plus_z_right_neutral = nat { n => plus(n)(z)(n) *=>: typ } -- "plus_z_right_neutral"
@@ -114,6 +115,7 @@ trait PlusUnique extends Naturals with Eq {
             plus_unique (n1)(n2)(n3)(n4) (d1) (d2) (eq1) *=>:
             plus_unique (s(n1))(n2)(s(n3))(s(n4)) (plus_s (n1)(n2)(n3) (d1)) (plus_s (n1)(n2)(n4) (d2)) (eq2)
   }}}}}}}}                                                       -- "pu_s"
+
 }
 
 
