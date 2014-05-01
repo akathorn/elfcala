@@ -20,6 +20,9 @@ class Test extends FunSuite with Signature {
     assertResult(true) {
       val naturals = new Naturals
       // Typecheck(naturals)
+
+      val even = new Even
+      // Typecheck(even)
     }
   }
 

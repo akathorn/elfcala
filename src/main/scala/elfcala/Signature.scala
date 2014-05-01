@@ -31,6 +31,7 @@ trait Signature {
 
 
   // Syntax sugaring
+  // TODO: it's become huge, should it be in another class?
   case class SymbolBinder(s: Symbol) {
     def :>(k: Kind)   = bindFamily(s)(k)
     def :>(a: Family) = bindObject(s)(a)
@@ -68,12 +69,15 @@ trait Signature {
   }
   case class KindBinder(k: Kind) {
     def ->:(s: Symbol) = Kind.Pi(Variable('x),
-                                   Family.Const(Constant(s)),
-                                   k)
+                                 Family.Const(Constant(s)),
+                                 k)
+    def ->:(a: Family) = Kind.Pi(Variable('x),
+                                 a,
+                                 k)
   }
 
   case class PiSugar(bindings: List[Pair[Symbol, Symbol]]) {
-    def /(b: Family) = {
+    def /(b: Family): Family = {
       def recBind(bindings: List[Pair[Symbol, Symbol]]): Family = bindings match {
         case Nil =>
           b
@@ -85,12 +89,24 @@ trait Signature {
       recBind(bindings)
     }
 
+    def /(k: Kind): Kind = {
+      def recBind(bindings: List[Pair[Symbol, Symbol]]): Kind = bindings match {
+        case Nil =>
+          k
+        case binding :: rest =>
+          Kind.Pi(Variable(binding._1),
+                  Family.Const(Constant(binding._2)),
+                  recBind(rest))
+      }
+      recBind(bindings)
+    }
+
     def apply(bind: Pair[Symbol, Symbol]) =
       PiSugar(bindings :+ bind)
   }
 
   def !!(bind: Pair[Symbol, Symbol]) = PiSugar(List((bind._1, bind._2)))
-
+  // TODO: bind Pair[Symbol, Family]
 
 
   implicit def symbolToBinder(s: Symbol): SymbolBinder = SymbolBinder(s)
