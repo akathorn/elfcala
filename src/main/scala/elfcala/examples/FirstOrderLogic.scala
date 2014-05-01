@@ -11,8 +11,8 @@ class FirstOrderLogic extends Signature {
   val i = 'i
   val o = 'o
 
-  |- (i :> Type)
-  |- (o :> Type)
+  i :> Type
+  o :> Type
 
   // Terms
   val z    = 'z
@@ -20,10 +20,10 @@ class FirstOrderLogic extends Signature {
   val plus = 'plus
   val prod = 'prod
 
-  |- (z    :> i)
-  |- (succ :> i ->: i)
-  |- (plus :> i ->: i ->: i )
-  |- (prod :> i ->: i ->: i )
+  z    :> i
+  succ :> i ->: i
+  plus :> i ->: i ->: i
+  prod :> i ->: i ->: i
 
   // Formulas
   val eq     = 'eq
@@ -35,32 +35,24 @@ class FirstOrderLogic extends Signature {
   val exists = 'exists
   val impl   = 'impl
 
-  |- (eq     :> i ->: i ->: o)
-  |- (less   :> i ->: i ->: o)
-  |- (not    :> o ->: o)
-  |- (or     :> o ->: o ->: o)
-  |- (and    :> o ->: o ->: o)
-  |- (forall :> (i ->: o) ->: o)
-  |- (exists :> (i ->: o) ->: o)
-  |- (impl   :> o ->: o ->: o)
+  eq     :> i ->: i ->: o
+  less   :> i ->: i ->: o
+  not    :> o ->: o
+  or     :> o ->: o ->: o
+  and    :> o ->: o ->: o
+  forall :> (i ->: o) ->: o
+  exists :> (i ->: o) ->: o
+  impl   :> o ->: o ->: o
 
   // Rules (judgements)
   val tru = 'tru
   val raa = 'raa
 
-  |- (tru :> o ->: Type)
+  tru :> o ->: Type
 
   // "reductio ad absurdum" rule
-  // TODO: add a spoonful sugar
-  // val p = 'p
-  // |- (raa :> Family.Pi(Variable(p),
-  //                   Family.Const(Constant(o)),
-  //                   (tru ( not ( not (p) ))) ->:
-  //                   (tru (p))))
-
-  // val p = 'p
-  // |- (raa :> |p| (o) (tru ( not ( not (p) )) ->: (tru (p))))
-
+  val p = 'p
+  raa :> !!(p, o)/ (tru ( not ( not (p) )) ->: (tru (p)))
 
 
   // TODO: add remaining rules

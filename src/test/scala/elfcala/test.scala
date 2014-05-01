@@ -26,10 +26,9 @@ class Test extends FunSuite with Signature {
   test("Syntactic sugar 1") {
     assertResult("ObjectBinding(Const(Constant('r)),Pi(Variable('p),Const(Constant('o)),Pi(Variable('x),App(Const(Constant('tru)),App(Const(Constant('not)),App(Const(Constant('not)),Var(Variable('p))))),App(Const(Constant('tru)),Var(Variable('p))))))") {
       val p = 'p; val o = 'o; val tru = 'tru; val not = 'not
-      ('r :> Family.Pi(Variable(p),
-                    Family.Const(Constant(o)),
-                    tru ( not ( not (p) )) ->: tru (p))
-       ).toString
+      (
+        'r :> !!(p, o)/ { tru ( not ( not (p) )) ->: (tru (p)) }
+      ).toString
     }
   }
 

@@ -15,12 +15,16 @@ class Naturals extends Signature {
   val plus_s = 'plus_s
 
 
-  |- (nat  :> Type)
-  |- (z    :> nat)
-  |- (s    :> nat ->: nat )
+  nat  :> Type
+  z    :> nat
+  s    :> nat ->: nat
 
-  // |- (plus :> nat ->: nat ->: nat ->: Type )
-  // |- (plus_z :> nat ->: nat ->: nat ->: Type )
+  plus :> nat ->: nat ->: nat ->: Type
+
+  val n = 'n; val n1 = 'n1; val n2 = 'n2; val n3 = 'n3;
+  plus_z :> !!(n, nat)/ ( plus(z)(n)(n) )
+  plus_s :> !!(n1, nat) (n2, nat) (n3, nat)/
+              { plus(n1)(n2)(n3) ->: plus(s(n1))(n2)(s(n3)) }
 
 
   println(bindings)
