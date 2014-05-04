@@ -47,17 +47,20 @@ class FirstOrderLogic extends Signature {
   // Rules (judgements)
   val tru = 'tru
   val raa = 'raa
+  val imp_i = 'imp_i
+
+  val p = 'p; val q = 'q
 
   tru :> o ->: Type
 
   // "reductio ad absurdum" rule
-  val p = 'p
-  raa :> !!(p, o)/ (tru ( not ( not (p) )) ->: (tru (p)))
 
+  raa :> !!(p, o)/ {tru ( not ( not (p) )) ->: (tru (p))}
+
+  // "Implication introduction" rule
+  // imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
 
   // TODO: add remaining rules
-  println(bindings)
-
 }
 
 

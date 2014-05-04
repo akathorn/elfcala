@@ -26,7 +26,6 @@ class Naturals extends Signature {
   plus_s :> !!(n1, nat) (n2, nat) (n3, nat)/
               { plus(n1)(n2)(n3) ->: plus(s(n1))(n2)(s(n3)) }
 
-  println(bindings)
 }
 
 
@@ -56,23 +55,6 @@ trait PlusZRightNeutral extends Naturals {
 }
 
 
-// trait PlusSRightInc extends Naturals {
-//   val plus_s_right_inc = nat { n1 => nat { n2 => nat { n3 =>
-//     plus(n1)(n2)(n3) *=>: plus(n1)(s(n2))(s(n3)) *=>: typ
-//   }}}                                                            -- "plus_s_right_inc"
-
-//   val psri_z = nat { n =>
-//     plus_s_right_inc(z)(n)(n) (plus_z(n)) (plus_z(s(n)))
-//   }                                                              -- "_z"
-
-//   val psri_s = nat { n1 => nat { n2 => nat { n3 =>
-//                 closeAppConst(plus(n1)(n2)(n3)) { d1 =>
-//                   closeAppConst(plus(n1)(s(n2))(s(n3))) { d2 =>
-//                     plus_s_right_inc (n1)(n2)(n3) (d1) (d2) *=>:
-//                     plus_s_right_inc (n1)(s(n2))(s(n3)) (plus_s(n1)(n2)(n3) (d1)) (plus_s (n1)(s(n2))(s(n3)) (d2))
-//   }}}}}                                                          -- "_s"
-// }
-
 trait PlusSRightInc extends Naturals {
   val plus_s_right_inc   = 'plus_s_right_neutral
   val plus_s_right_inc_z = 'plus_s_right_neutral_z
@@ -93,5 +75,4 @@ trait PlusSRightInc extends Naturals {
   //     plus_s_right_inc (n1)(n2)(n3) (d1) (d2) ->:
   //     plus_s_right_inc (n1)(s(n2))(s(n3)) (plus_s(n1)(n2)(n3) (d1)) (plus_s(n1)(s(n2))(s(n3)) (d2))
   // } } }
-
 }
