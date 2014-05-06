@@ -61,6 +61,8 @@ class FirstOrderLogic extends Signature {
   // imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
 
   // TODO: add remaining rules
+
+  println(PrettyPrinter(Typecheck(exists(less(z)), this)))
 }
 
 

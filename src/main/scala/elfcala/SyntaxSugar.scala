@@ -27,7 +27,9 @@ trait SyntaxSugar {
   // TODO:
   // implicit def symbolToObjectVariable(s: Symbol): Object = Object.Var(Variable(s))
   // implicit def symbolToObjectConstant(s: Symbol): Object = Object.Const(Constant(s))
-  implicit def symbolToFamilyConstant(s: Symbol): Family = Family.Const(Constant(s))
+  implicit def symbolToFamilyConstant(s: Symbol): Family =
+    Family.Const(Constant(s))
+  implicit def symbolToName(s: Symbol): Name = Name(s.name)
 
 
   // Syntax sugaring
@@ -38,7 +40,7 @@ trait SyntaxSugar {
     def :>(k: Kind)   = bindFamily(s)(k)
     def :>(a: Family) = bindObject(s)(a)
 
-    def ->:(o: Family) = Family.Pi(Variable('x), o, s)
+    def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, s)
 
     def apply(o: Symbol): Application =
       if (objectConstants contains o) {
@@ -58,7 +60,7 @@ trait SyntaxSugar {
   // }
 
   case class FamilyBinder(a: Family) {
-    def ->:(o: Family) = Family.Pi(Variable('x), o, a)
+    def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, a)
 
     def apply(o: Symbol): Family =
       if (objectConstants contains o) {
@@ -70,7 +72,7 @@ trait SyntaxSugar {
     def apply(o: Object): Family = Family.App(a, o)
   }
   case class KindBinder(k: Kind) {
-    def ->:(a: Family) = Kind.Pi(Variable('x),
+    def ->:(a: Family) = Kind.Pi(Variable(Name.fresh("x")),
                                  a,
                                  k)
   }

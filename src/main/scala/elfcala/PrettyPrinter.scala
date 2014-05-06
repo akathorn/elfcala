@@ -34,13 +34,13 @@ object PrettyPrinter {
     case Type =>
       "Type"
     case Kind.Pi(x, a, k) =>
-      if (freeVariables(k) contains x.x) {
+      if (freeVariables(k) contains x) {
         // Use Π notation
         "Π" + this(x) + ":" + this(a) + ". " + this(k)
       } else {
         // Use -> notation
         k match {
-          case _ : Kind.Pi =>
+          case Kind.Pi(y, _, _) => // if (freeVariables(k) contains y) =>
             "(" + this(a) + ") -> " + this(k)
           case _ =>
             this(a) + " -> " + this(k)
@@ -53,13 +53,13 @@ object PrettyPrinter {
     case Family.Const(d: Constant) =>
       this(d)
     case Family.Pi(x: Variable, a: Family, b: Family) =>
-      if (freeVariables(b) contains x.x) {
+      if (freeVariables(b) contains x) {
         // Use Π notation
         "Π" + this(x) + ":" + this(a) + ". " + this(b)
       } else {
         // Use -> notation
         a match {
-          case _ : Family.Pi =>
+          case Family.Pi(y, _, _) => // if (freeVariables(b) contains y) =>
             "(" + this(a) + ") -> " + this(b)
           case _ =>
             this(a) + " -> " + this(b)

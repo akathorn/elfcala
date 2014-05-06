@@ -15,6 +15,10 @@ object Typecheck {
     valid(signature.bindings)
   }
 
+  def apply(m: Object, signature: Signature) = {
+    typ(m, Nil, signature.bindings)
+  }
+
   def valid(s: Sgn): Boolean = s match {
     case Nil => true
     case _ =>
@@ -48,7 +52,7 @@ object Typecheck {
       valid(kk, c :+ VariableBinding(x, a), s)
   }
 
-  def kind(a: Family, c: Ctx, s: Sgn): Kind = a match {
+  def kind(f: Family, c: Ctx, s: Sgn): Kind = f match {
     case Family.Const(d) =>
       s collectFirst { case FamilyBinding(dd, k) if dd == d => k } match {
         case Some(k) => k
@@ -58,6 +62,10 @@ object Typecheck {
 
     case Family.Pi(x, a, b)
       if (kind(b, c :+ VariableBinding(x, a), s) == Type) =>
+        // TODO: c :+ VariableBinding(x, a) hast to be a valid context!  we
+        // could be introducing an invalid a in the context, for instance if
+        // it has free variables. This happens many times in this file, I
+        // think.
         Type
     case Family.Abs(x, a, b) =>
       val k = kind(b, c :+ VariableBinding(x, a), s)
@@ -65,16 +73,20 @@ object Typecheck {
     case Family.App(a, m) =>
       val b = typ(m, c, s)
       val Kind.Pi(x, b2, k) = kind(a, c, s)
-      // b should be equal to b2
-      // TODO: define equality
-      k // TODO: substitute m in x!
-      // TODO: substitution [M/x] K
-
+      // TODO: b should be equal to b2
+      if (b == b2) {
+        subst(x, m, k)
+      } else {
+        // TODO: this could really be more helpful than this
+        throw new Exception("Type error in expression " + PrettyPrinter(f) +
+                            ": " + PrettyPrinter(b) +
+                            " expected but " + PrettyPrinter(b2) + " found")
+      }
     // TODO: (B-CONV-FAM) ?
 
   }
 
-  def typ(m: Object, c: Ctx, s: Sgn): Family = m match {
+  def typ(o: Object, c: Ctx, s: Sgn): Family = o match {
     case Object.Const(cnst: Constant) =>
       s collectFirst { case ObjectBinding(cc, a) if cc == cnst => a } match {
         case Some(a) => a
@@ -98,9 +110,11 @@ object Typecheck {
     case Object.App(m: Object, n: Object) =>
       val Family.Pi(x, a, b) = typ(m, c, s)
       if (typ(n, c, s) == a) {
-        b // TODO: substitute n in x!
+        subst(x, n, b)
       } else {
-        throw new Exception
+        throw new Exception("Type error in expression '" + PrettyPrinter(o) +
+                            "': " + PrettyPrinter(a) + " expected but " +
+                            PrettyPrinter(typ(n, c, s)) + " found")
       }
 
     // TODO: (B-CONV-OBJ) ?
