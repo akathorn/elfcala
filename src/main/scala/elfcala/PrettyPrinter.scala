@@ -34,8 +34,18 @@ object PrettyPrinter {
     case Type =>
       "Type"
     case Kind.Pi(x, a, k) =>
-      // TODO: if x is not free in k, print as a -> k
-      "Π" + this(x) + ":" + this(a) + "." + this(k)
+      if (freeVariables(k) contains x.x) {
+        // Use Π notation
+        "Π" + this(x) + ":" + this(a) + ". " + this(k)
+      } else {
+        // Use -> notation
+        k match {
+          case _ : Kind.Pi =>
+            "(" + this(a) + ") -> " + this(k)
+          case _ =>
+            this(a) + " -> " + this(k)
+        }
+      }
   }
 
   // Family printing
@@ -43,10 +53,20 @@ object PrettyPrinter {
     case Family.Const(d: Constant) =>
       this(d)
     case Family.Pi(x: Variable, a: Family, b: Family) =>
-      // TODO: if x is not free in b, print as a -> b
-      "Π" + this(x) + ":" + this(a) + "." + this(b)
+      if (freeVariables(b) contains x.x) {
+        // Use Π notation
+        "Π" + this(x) + ":" + this(a) + ". " + this(b)
+      } else {
+        // Use -> notation
+        a match {
+          case _ : Family.Pi =>
+            "(" + this(a) + ") -> " + this(b)
+          case _ =>
+            this(a) + " -> " + this(b)
+        }
+      }
     case Family.Abs(x: Variable, a: Family, b: Family) =>
-      "λ" + this(x) + ":" + this(a) + "." + this(b)
+      "λ" + this(x) + ":" + this(a) + ". " + this(b)
     case Family.App(a: Family, m: Object) => m match {
       case Object.App(_, _) =>
         this(a) + " (" + this(m) + ")"
@@ -62,7 +82,7 @@ object PrettyPrinter {
     case Object.Var(d: Variable) =>
       this(d)
     case Object.Abs(x: Variable, a: Family, b: Object) =>
-      "λ" + this(x) + ":" + this(a) + "." + this(b)
+      "λ" + this(x) + ":" + this(a) + ". " + this(b)
     case Object.App(a: Object, m: Object) => m match {
       case Object.App(_, _) =>
         this(a) + " (" + this(m) + ")"
