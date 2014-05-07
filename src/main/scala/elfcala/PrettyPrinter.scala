@@ -4,6 +4,8 @@ import LogicalFramework._
 import Kind.Type
 
 object PrettyPrinter {
+  def twelfPrint(bds: List[SignatureBinding]): String =
+    ("" /: (bds map { x => this(x) + ".\n" })) (_+_)
 
   def apply(bds: List[SignatureBinding]): String =
     ("" /: (bds map { x => this(x) + "\n" })) (_+_)
@@ -32,11 +34,11 @@ object PrettyPrinter {
   // Kind printing
   def apply(k: Kind): String = k match {
     case Type =>
-      "Type"
+      "type"
     case Kind.Pi(x, a, k) =>
       if (freeVariables(k) contains x) {
-        // Use Π notation
-        "Π" + this(x) + ":" + this(a) + ". " + this(k)
+        // Use {x:t} notation
+        "{" + this(x) + ":" + this(a) + "} " + this(k)
       } else {
         // Use -> notation
         k match {
@@ -54,8 +56,8 @@ object PrettyPrinter {
       this(d)
     case Family.Pi(x: Variable, a: Family, b: Family) =>
       if (freeVariables(b) contains x) {
-        // Use Π notation
-        "Π" + this(x) + ":" + this(a) + ". " + this(b)
+        // Use {x:t} notation
+        "{" + this(x) + ":" + this(a) + "} " + this(b)
       } else {
         // Use -> notation
         a match {

@@ -11,7 +11,7 @@ object Typecheck {
   def apply(signature: Signature) = {
     // TODO: what happens if there is a family binding and an object binding
     // for the same constant?
-    println(PrettyPrinter(signature.bindings))
+    println(PrettyPrinter.twelfPrint(signature.bindings))
     valid(signature.bindings)
   }
 
