@@ -6,7 +6,7 @@ import LogicalFramework.Kind.Type
 
 
 // From "A Framework for Defining Logics", by Harper, Honsell, and Plotkin
-class FirstOrderLogic extends Signature {
+trait FirstOrderLogic extends Signature {
   // Types
   val i = 'i
   val o = 'o
@@ -61,6 +61,7 @@ class FirstOrderLogic extends Signature {
   // imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
 
   // TODO: add remaining rules
+
 }
 
 

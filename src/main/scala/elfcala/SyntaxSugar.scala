@@ -28,6 +28,8 @@ trait SyntaxSugar {
   // implicit def symbolToObjectConstant(s: Symbol): Object = Object.Const(Constant(s))
   implicit def symbolToFamilyConstant(s: Symbol): Family =
     Family.Const(Constant(s))
+  implicit def symbolToObjectConstant(s: Symbol): Object =
+    Object.Const(Constant(s))
   implicit def symbolToName(s: Symbol): Name = Name(s.name)
 
 
@@ -52,10 +54,16 @@ trait SyntaxSugar {
       Application(s, applicationToObject(o))
   }
 
-  // case class ObjectBinder(t: Object) {
-  //   def apply(o: Symbol): Object = Object.App(t, Object.Var(Variable(o)))
-  //   def apply(o: Object): Object = Object.App(t, o)
-  // }
+  case class ObjectBinder(t: Object) {
+    def apply(o: Symbol): Object =
+      if (objectConstants contains o) {
+        // TODO: maybe we could use uppercase/lowercase to differenciate?
+        Object.App(t, Object.Const(Constant(o)))
+      } else {
+        Object.App(t, Object.Var(Variable(o)))
+      }
+    def apply(o: Object): Object = Object.App(t, o)
+  }
 
   case class FamilyBinder(a: Family) {
     def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, a)
@@ -77,7 +85,7 @@ trait SyntaxSugar {
 
   implicit def symbolToBinder(s: Symbol): SymbolBinder = SymbolBinder(s)
   implicit def familyToBinder(a: Family): FamilyBinder = FamilyBinder(a)
-//  implicit def objectToBinder(o: Object): ObjectBinder = ObjectBinder(o)
+  implicit def objectToBinder(o: Object): ObjectBinder = ObjectBinder(o)
   implicit def kindToBinder(k: Kind):     KindBinder   = KindBinder(k)
 
 

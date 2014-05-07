@@ -5,7 +5,7 @@ import LogicalFramework._
 import Kind.Type
 
 
-class Naturals extends Signature {
+trait Naturals extends Signature {
   // Terms
   val nat    = 'nat
   val z = 'z
@@ -29,7 +29,7 @@ class Naturals extends Signature {
 }
 
 
-class Even extends Naturals {
+trait Even extends Naturals {
   val even = 'even
   val even_z = 'even_z
   val even_s = 'even_s
