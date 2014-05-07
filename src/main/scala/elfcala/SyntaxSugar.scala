@@ -79,9 +79,9 @@ trait SyntaxSugar {
 
 
   // Pi sugar
-  case class PiSugar(bindings: List[Pair[Symbol, Symbol]]) {
+  case class PiSugar(bindings: List[Pair[Symbol, Family]]) {
     def /(b: Family): Family = {
-      def recBind(bindings: List[Pair[Symbol, Symbol]]): Family = bindings match {
+      def recBind(bindings: List[Pair[Symbol, Family]]): Family = bindings match {
         case Nil =>
           b
         case binding :: rest =>
@@ -94,7 +94,7 @@ trait SyntaxSugar {
 
     // TODO: eliminate code repetition
     def /(k: Kind): Kind = {
-      def recBind(bindings: List[Pair[Symbol, Symbol]]): Kind = bindings match {
+      def recBind(bindings: List[Pair[Symbol, Family]]): Kind = bindings match {
         case Nil =>
           k
         case binding :: rest =>
@@ -105,12 +105,11 @@ trait SyntaxSugar {
       recBind(bindings)
     }
 
-    def apply(bind: Pair[Symbol, Symbol]) =
+    def apply(bind: Pair[Symbol, Family]) =
       PiSugar(bindings :+ bind)
   }
 
-  def !!(bind: Pair[Symbol, Symbol]) = PiSugar(List((bind._1, bind._2)))
-  // TODO: bind Pair[Symbol, Family]
+  def !!(bind: Pair[Symbol, Family]) = PiSugar(List((bind._1, bind._2)))
 
 
   // Application sugar
