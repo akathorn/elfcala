@@ -89,7 +89,10 @@ object Typecheck {
     case Object.Const(cnst: Constant) =>
       s collectFirst { case ObjectBinding(cc, a) if cc == cnst => a } match {
         case Some(a) => a
-        case None => throw new Exception
+        case None => throw new Exception("Type error in expression '" +
+                                         PrettyPrinter(o) + "': " +
+                                         " Binding for constant " +
+                                         PrettyPrinter(cnst) + " not found")
         case other => throw new Exception("invalid binding")
       }
 
