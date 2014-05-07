@@ -24,7 +24,6 @@ trait SyntaxSugar {
   }
 
 
-  // TODO:
   // implicit def symbolToObjectVariable(s: Symbol): Object = Object.Var(Variable(s))
   // implicit def symbolToObjectConstant(s: Symbol): Object = Object.Const(Constant(s))
   implicit def symbolToFamilyConstant(s: Symbol): Family =
@@ -33,7 +32,6 @@ trait SyntaxSugar {
 
 
   // Syntax sugaring
-  // TODO: it's become huge, should it be in another class?
 
   // Binders
   case class SymbolBinder(s: Symbol) {

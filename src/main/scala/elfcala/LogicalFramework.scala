@@ -162,6 +162,79 @@ object LogicalFramework {
   }
 
 
+
+  // Equality
+  def equal(k: Kind, l: Kind): Boolean = {
+    canonicalName(Reduce(k)) == canonicalName(Reduce(l))
+    // TODO: rename variables to a "canonical form" before comparing
+  }
+
+  def equal(a: Family, b: Family): Boolean = {
+    canonicalName(Reduce(a)) == canonicalName(Reduce(b))
+    // TODO: rename variables to a "canonical form" before comparing
+  }
+
+  def equal(n: Object, m: Object): Boolean = {
+    canonicalName(Reduce(n)) == canonicalName(Reduce(m))
+    // TODO: rename variables to a "canonical form" before comparing
+  }
+
+  // Canonical renaming
+  def canonicalName(k: Kind): Kind =
+    canonicalName(k, 0)
+
+  def canonicalName(a: Family): Family =
+    canonicalName(a, 0)
+
+  def canonicalName(m: Object): Object =
+    canonicalName(m, 0)
+
+  // Kinds
+  private def canonicalName(k: Kind, count: Int): Kind = k match {
+    case Kind.Type =>
+      Kind.Type
+    case Kind.Pi(x, a, l) =>
+      val y = Variable(new Name(count.toString))
+      Kind.Pi(y,
+              // TODO: It's not clear to me if we can safely do recursion in
+              // this way
+              canonicalName(rename(x, y, a), count + 1),
+              canonicalName(rename(x, y, l), count + 1))
+  }
+
+  // Families
+  private def canonicalName(a: Family, count: Int): Family = a match {
+    case Family.Const(_) =>
+      a
+    case Family.Pi(x, b, c) =>
+      val y = Variable(new Name(count.toString))
+      Family.Pi(y,
+                canonicalName(rename(x, y, b), count + 1),
+                canonicalName(rename(x, y, c), count + 1))
+    case Family.Abs(x, b, c) =>
+      val y = Variable(new Name(count.toString))
+      Family.Abs(y,
+                 canonicalName(rename(x, y, b), count + 1),
+                 canonicalName(rename(x, y, c), count + 1))
+    case Family.App(b, m) =>
+      Family.App(canonicalName(b, count + 1), canonicalName(m, count + 1))
+  }
+
+  // Objects
+  private def canonicalName(m: Object, count: Int): Object = m match {
+    case Object.Const(_) =>
+      m
+    case Object.Var(x) =>
+      Object.Var(Variable(new Name(count.toString)))
+    case Object.Abs(x, a, b) =>
+      val y = Variable(new Name(count.toString))
+      Object.Abs(y,
+                 canonicalName(rename(x, y, a), count + 1),
+                 canonicalName(rename(x, y, b), count + 1))
+    case Object.App(m, n) =>
+      Object.App(canonicalName(m, count + 1), canonicalName(n, count + 1))
+  }
+
 }
 
 

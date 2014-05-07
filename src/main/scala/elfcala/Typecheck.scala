@@ -73,8 +73,7 @@ object Typecheck {
     case Family.App(a, m) =>
       val b = typ(m, c, s)
       val Kind.Pi(x, b2, k) = kind(a, c, s)
-      // TODO: b should be equal to b2
-      if (b == b2) {
+      if (equal(b, b2)) {
         subst(x, m, k)
       } else {
         // TODO: this could really be more helpful than this
@@ -109,12 +108,12 @@ object Typecheck {
 
     case Object.App(m: Object, n: Object) =>
       val Family.Pi(x, a, b) = typ(m, c, s)
-      if (typ(n, c, s) == a) {
+      if (equal(typ(n, c, s), a)) {
         subst(x, n, b)
       } else {
         throw new Exception("Type error in expression '" + PrettyPrinter(o) +
-                            "': " + PrettyPrinter(a) + " expected but " +
-                            PrettyPrinter(typ(n, c, s)) + " found")
+                            "': (" + PrettyPrinter(a) + ") expected but (" +
+                            PrettyPrinter(typ(n, c, s)) + ") found")
       }
 
     // TODO: (B-CONV-OBJ) ?
