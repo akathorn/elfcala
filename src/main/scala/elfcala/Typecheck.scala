@@ -100,7 +100,6 @@ object Typecheck {
       c collectFirst { case VariableBinding(xx,a) if xx == x => a } match {
         case Some(a) => a
         case None =>
-          println(c)
           throw new Exception("Binding for " + x + " not found")
         case other => throw new Exception("invalid binding")
       }
