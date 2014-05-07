@@ -58,7 +58,7 @@ trait FirstOrderLogic extends Signature {
   raa :> !!(p, o)/ {tru ( not ( not (p) )) ->: (tru (p))}
 
   // "Implication introduction" rule
-  // imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
+  imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
 
   // TODO: add remaining rules
 

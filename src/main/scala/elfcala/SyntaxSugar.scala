@@ -28,8 +28,14 @@ trait SyntaxSugar {
   // implicit def symbolToObjectConstant(s: Symbol): Object = Object.Const(Constant(s))
   implicit def symbolToFamilyConstant(s: Symbol): Family =
     Family.Const(Constant(s))
-  implicit def symbolToObjectConstant(s: Symbol): Object =
-    Object.Const(Constant(s))
+  implicit def symbolToObjectConstant(s: Symbol): Object = {
+    // TODO: maybe we could use uppercase/lowercase to differenciate?
+    if (objectConstants contains s) {
+      Object.Const(Constant(s))
+    } else {
+      Object.Var(Variable(s))
+    }
+  }
   implicit def symbolToName(s: Symbol): Name = Name(s.name)
 
 
@@ -42,39 +48,22 @@ trait SyntaxSugar {
 
     def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, s)
 
-    def apply(o: Symbol): Application =
-      if (objectConstants contains o) {
-        Application(s, Object.Const(Constant(o)))
-      } else {
-        Application(s, Object.Var(Variable(o)))
-      }
+    def apply(o: Symbol): Application = SymbolApplication(s, o)
 
-    def apply(o: Object): Application = Application(s, o)
+    def apply(o: Object): Application = SymbolApplication(s, o)
     def apply(o: Application): Application =
-      Application(s, applicationToObject(o))
+      SymbolApplication(s, applicationToObject(o))
   }
 
   case class ObjectBinder(t: Object) {
-    def apply(o: Symbol): Object =
-      if (objectConstants contains o) {
-        // TODO: maybe we could use uppercase/lowercase to differenciate?
-        Object.App(t, Object.Const(Constant(o)))
-      } else {
-        Object.App(t, Object.Var(Variable(o)))
-      }
+    def apply(o: Symbol): Object = Object.App(t, o)
     def apply(o: Object): Object = Object.App(t, o)
   }
 
   case class FamilyBinder(a: Family) {
     def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, a)
 
-    def apply(o: Symbol): Family =
-      if (objectConstants contains o) {
-        Family.App(a, Object.Const(Constant(o)))
-      } else {
-        Family.App(a, Object.Var(Variable(o)))
-      }
-
+    def apply(o: Symbol): Family = Family.App(a, o)
     def apply(o: Object): Family = Family.App(a, o)
   }
   case class KindBinder(k: Kind) {
@@ -125,21 +114,41 @@ trait SyntaxSugar {
 
 
   // Application sugar
-  case class Application(n: Symbol, m: Object) {
+  abstract class Application {
+    def ->:(o: Family): Family
+
+    def apply(s: Symbol): AppApplication
+    def apply(o: Object): AppApplication
+  }
+
+  case class SymbolApplication(n: Symbol, m: Object) extends Application {
     def ->:(o: Family) = o ->: FamilyBinder(applicationToFamily(this))
 
-    def apply(s: Symbol): Family = applicationToFamily(this).apply(s)
-    def apply(o: Object): Family = applicationToFamily(this).apply(o)
+    def apply(s: Symbol): AppApplication = AppApplication(this, s)
+    def apply(o: Object): AppApplication = AppApplication(this, o)
+  }
+
+  case class AppApplication(n: Application, m: Object) extends Application {
+    def ->:(o: Family) = o ->: FamilyBinder(applicationToFamily(this))
+
+    def apply(s: Symbol): AppApplication = AppApplication(this, s)
+    def apply(o: Object): AppApplication = AppApplication(this, o)
   }
 
 
-  implicit def applicationToFamily(a: Application): Family = {
-    val Application(n, m) = a
-    Family.App(n, m)
+  implicit def applicationToFamily(a: Application): Family = a match {
+    case SymbolApplication(n, m) =>
+      Family.App(n, m)
+    case AppApplication(n, m) =>
+      Family.App(n, m)
   }
-  implicit def applicationToObject(a: Application): Object = {
-    val Application(n, m) = a
-    Object.App(Object.Const(Constant(n)), m)
+  implicit def applicationToObject(a: Application): Object = a match {
+    case SymbolApplication(n, m) =>
+      Object.App(n, m)
+    case AppApplication(n, m) =>
+      Object.App(n, m)
   }
+
+
 
 }
