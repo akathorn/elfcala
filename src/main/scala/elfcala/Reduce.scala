@@ -5,30 +5,21 @@ import LogicalFramework._
 // From "A Framework for Defining Logics"
 object Reduce {
 
-  def apply(k: Kind): Kind = {
-    val rk = reduce(k)
-    if (rk != k)
-      this(reduce(rk))
+  def apply(x: Term): Term = {
+    val rx = reduce(x)
+    if (rx != x)
+      this(reduce(rx))
     else
-      k
+      x
   }
 
-  // TODO: absurd ammount of code duplication, maybe create an abstract super
-  // type for kinds, families, and objects?
-  def apply(a: Family): Family = {
-    val ra = reduce(a)
-    if (ra != a)
-      this(ra)
-    else
-      a
-  }
-
-  def apply(m: Object): Object = {
-    val rm = reduce(m)
-    if (rm != m)
-      this(rm)
-    else
-      m
+  private def reduce(x: Term): Term = x match {
+    case x: Kind =>
+      reduce(x)
+    case x: Family =>
+      reduce(x)
+    case x: Object =>
+      reduce(x)
   }
 
   // Kind reduction

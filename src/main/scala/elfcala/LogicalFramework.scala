@@ -3,10 +3,13 @@ package elfcala
 object LogicalFramework {
   // Variables
   case class Variable(x: Name)
-  case class Constant(a: Name)
+  case class Constant(c: Name)
+
+  // Terms
+  abstract class Term
 
   // Kinds
-  abstract class Kind
+  abstract class Kind extends Term
 
   object Kind {
     case object Type extends Kind
@@ -14,7 +17,7 @@ object LogicalFramework {
   }
 
   // Families
-  abstract class Family
+  abstract class Family extends Term
 
   object Family {
     case class Const(d: Constant) extends Family
@@ -24,7 +27,7 @@ object LogicalFramework {
   }
 
   // Objects
-  abstract class Object
+  abstract class Object extends Term
 
   object Object {
     case class Const(c: Constant) extends Object
@@ -53,7 +56,7 @@ object LogicalFramework {
       freeVariables(a) ++ freeVariables(m)
   }
 
-  def freeVariables(o: Object): Set[Variable] = o match {
+  def freeVariables(m: Object): Set[Variable] = m match {
     case Object.Const(_) =>
       Set.empty
     case Object.Var(x) =>
@@ -69,7 +72,6 @@ object LogicalFramework {
     val Variable(n) = x
     Variable(Name.fresh(n.name))
   }
-
 
   // Renaming
   // Kinds
@@ -99,9 +101,9 @@ object LogicalFramework {
   }
 
   // Objects
-  def rename(x: Variable, y: Variable, o: Object): Object = o match {
+  def rename(x: Variable, y: Variable, m: Object): Object = m match {
     case Object.Const(_) =>
-      o
+      m
     case Object.Var(x) if x == y =>
       Object.Var(y)
     case Object.Abs(z, a, b) if x == z =>
@@ -129,18 +131,14 @@ object LogicalFramework {
   def subst(x: Variable, o: Object, a: Family): Family = a match {
     case Family.Const(_) =>
       a
-    case Family.Pi(y, b, c) =>
-      if (x != y && !(freeVariables(o) contains y)) {
+    case Family.Pi(y, b, c) if (x != y && !(freeVariables(o) contains y)) =>
         Family.Pi(y, subst(x, o, b), subst(x, o, c))
-      } else {
+    case Family.Pi(y, b, c) =>
         subst(x, o, rename(y, freshVar(y), a))
-      }
-    case Family.Abs(y, b, c) =>
-      if (x != y && !(freeVariables(o) contains y)) {
+    case Family.Abs(y, b, c) if (x != y && !(freeVariables(o) contains y)) =>
         Family.Abs(y, subst(x, o, b), subst(x, o, c))
-      } else {
+    case Family.Abs(y, b, c) =>
         subst(x, o, rename(y, freshVar(y), a))
-      }
     case Family.App(b, m) =>
       Family.App(subst(x, o, b), subst(x, o, m))
   }
@@ -151,43 +149,25 @@ object LogicalFramework {
       p
     case Object.Var(y) if x == y =>
       o
-    case Object.Abs(y, a, m) =>
-      if (x != y && !(freeVariables(o) contains y)) {
+    case Object.Abs(y, a, m) if (x != y && !(freeVariables(o) contains y)) =>
         Object.Abs(y, subst(x, o, a), subst(x, o, m))
-      } else {
+    case Object.Abs(y, a, m) =>
         subst(x, o, rename(y, freshVar(y), m))
-      }
     case Object.App(m, n) =>
       Object.App(subst(x, o, m), subst(x, o, n))
   }
 
-
-
   // Equality
-  def equal(k: Kind, l: Kind): Boolean = {
-    canonicalName(Reduce(k)) == canonicalName(Reduce(l))
-    // TODO: rename variables to a "canonical form" before comparing
-  }
-
-  def equal(a: Family, b: Family): Boolean = {
-    canonicalName(Reduce(a)) == canonicalName(Reduce(b))
-    // TODO: rename variables to a "canonical form" before comparing
-  }
-
-  def equal(n: Object, m: Object): Boolean = {
-    canonicalName(Reduce(n)) == canonicalName(Reduce(m))
-    // TODO: rename variables to a "canonical form" before comparing
+  def equal(x: Term, y: Term): Boolean = {
+    canonicalName(Reduce(x)) == canonicalName(Reduce(y))
   }
 
   // Canonical renaming
-  def canonicalName(k: Kind): Kind =
-    canonicalName(k, 0)
-
-  def canonicalName(a: Family): Family =
-    canonicalName(a, 0)
-
-  def canonicalName(m: Object): Object =
-    canonicalName(m, 0)
+  def canonicalName(x: Term): Term = x match {
+    case x: Kind   => canonicalName(x, 0)
+    case x: Family => canonicalName(x, 0)
+    case x: Object => canonicalName(x, 0)
+  }
 
   // Kinds
   private def canonicalName(k: Kind, count: Int): Kind = k match {
@@ -236,5 +216,3 @@ object LogicalFramework {
   }
 
 }
-
-

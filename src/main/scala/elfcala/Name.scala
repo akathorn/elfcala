@@ -6,8 +6,8 @@ class Name(val name: String) {
   def copy: Name = Name.fresh(name)
 
   override def equals(other: Any): Boolean = other match {
-    case n : Name if n.name == this.name =>
-      true
+    case n : Name =>
+      n.name == this.name
     case _ =>
       false
   }
