@@ -149,6 +149,8 @@ object LogicalFramework {
       p
     case Object.Var(y) if x == y =>
       o
+    case Object.Var(y) =>
+      p
     case Object.Abs(y, a, m) if (x != y && !(freeVariables(o) contains y)) =>
         Object.Abs(y, subst(x, o, a), subst(x, o, m))
     case Object.Abs(y, a, m) =>
