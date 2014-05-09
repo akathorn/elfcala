@@ -10,50 +10,43 @@ import LogicalFramework._
 class Test extends FunSuite with Signature {
   test("First order logic") {
     assertResult(true) {
-      class FO extends FirstOrderLogic
-      val fol = new FO
-      Typecheck(fol)
+      Typecheck(new FirstOrderLogic {})
     }
   }
 
   test("Natural numbers") {
     assertResult(true) {
-      class Nats extends Naturals
-      val naturals = new Nats
-      //      val even = new Even
-      Typecheck(naturals) //&& Typecheck(even)
+      Typecheck(new Naturals {})
+    }
+  }
+
+  test("Proofs of natural numbers") {
+    assertResult(true) {
+      Typecheck(new PlusSRightInc {}) && Typecheck(new PlusZRightNeutral {})
     }
   }
 
   test("Expressions") {
     assertResult(true) {
-      class Exprs extends Expressions
-      val exprs = new Exprs
-      Typecheck(exprs)
+      Typecheck(new Expressions {})
     }
   }
 
   test("Lists of naturals") {
     assertResult(true) {
-      class Lst extends NatList
-      val lists = new Lst
-      Typecheck(lists)
+      Typecheck(new NatList {})
     }
   }
 
   test("Lists of expressions") {
     assertResult(true) {
-      class Lst extends ExprList
-      val lists = new Lst
-      Typecheck(lists)
+      Typecheck(new ExprList {})
     }
   }
 
   test("Full list example") {
     assertResult(true) {
-      class Lst extends FullLists
-      val lists = new Lst
-      Typecheck(lists)
+      Typecheck(new FullLists {})
     }
   }
 
