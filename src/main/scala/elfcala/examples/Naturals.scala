@@ -49,9 +49,9 @@ trait PlusZRightNeutral extends Naturals {
   plus_z_right_neutral_z :> plus_z_right_neutral(z)(plus_z(z))
 
   val d = 'd
-  plus_z_right_neutral_s :> !!(n, nat) (d, plus)/
+  plus_z_right_neutral_s :> !!(n, nat) (d, plus(n)(z)(n))/
       { plus_z_right_neutral (n) (d) ->:
-        plus_z_right_neutral (s(n)) (plus_s (d)) }
+        plus_z_right_neutral (s(n)) ( (plus_s(n)(z)(n)) (d)) }
 }
 
 
