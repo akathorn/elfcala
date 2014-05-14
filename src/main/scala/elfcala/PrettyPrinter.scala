@@ -3,7 +3,9 @@ package elfcala
 import LogicalFramework._
 import Kind.Type
 
-object PrettyPrinter {
+object PrettyPrinter extends PrettyPrinter
+
+trait PrettyPrinter {
   def twelfPrint(bds: List[SignatureBinding]): String =
     ("" /: (bds map { x => this(x) + ".\n" })) (_+_)
 

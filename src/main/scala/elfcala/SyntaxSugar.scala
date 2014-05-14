@@ -28,7 +28,7 @@ trait SyntaxSugar {
   // implicit def symbolToObjectConstant(s: Symbol): Object = Object.Const(Constant(s))
   implicit def symbolToFamilyConstant(s: Symbol): Family =
     Family.Const(Constant(s))
-  implicit def symbolToObjectConstant(s: Symbol): Object = {
+  implicit def symbolToObject(s: Symbol): Object = {
     // TODO: maybe we could use uppercase/lowercase to differenciate?
     if (objectConstants contains s) {
       Object.Const(Constant(s))
