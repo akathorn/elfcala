@@ -4,42 +4,43 @@ import org.scalatest._
 
 import elfcala._
 import elfcala.examples._
+import elfcala.twelf._
 
 class TwelfTests extends FunSuite with Signature {
   test("Twelf server test (low level)") {
     assertResult("%% OK %%") {
-      Twelf.init()
-      Twelf.serverInput.println("readDecl")
-      Twelf.serverInput.println("nat: type.")
-      Twelf.serverInput.println("quit")
-      Twelf.serverInput.flush()
-      val out = Twelf.serverOutput.getLines.toList.last
-      Twelf.close()
+      TwelfServer.init()
+      TwelfServer.serverInput.println("readDecl")
+      TwelfServer.serverInput.println("nat: type.")
+      TwelfServer.serverInput.println("quit")
+      TwelfServer.serverInput.flush()
+      val out = TwelfServer.serverOutput.getLines.toList.last
+      TwelfServer.close()
       out
     }
   }
 
   test("Twelf test (naturals)") {
     assertResult(true) {
-      Twelf.check_signature(new Naturals {})
+      TwelfCheck(new Naturals {})
     }
   }
 
   test("Twelf test (naturals with proofs)") {
     assertResult(true) {
-      Twelf.check_signature(new PlusSRightInc with PlusZRightNeutral {})
+      TwelfCheck(new PlusSRightInc with PlusZRightNeutral {})
     }
   }
 
   test("Twelf totality test (naturals with proofs)") {
     assertResult(true) {
-      Twelf.check_signature(new TwelfExample {})
+      TwelfCheck(new TwelfExample {})
     }
   }
 
   test("Twelf test (lists)") {
     assertResult(true) {
-      Twelf.check_signature(new FullLists {})
+      TwelfCheck(new FullLists {})
     }
   }
 
