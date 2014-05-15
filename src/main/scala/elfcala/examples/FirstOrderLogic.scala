@@ -8,62 +8,36 @@ import LogicalFramework.Kind.Type
 // From "A Framework for Defining Logics", by Harper, Honsell, and Plotkin
 trait FirstOrderLogic extends Signature {
   // Types
-  val i = 'i
-  val o = 'o
-
-  i :> Type
-  o :> Type
+  val i = 'i :> Type
+  val o = 'o :> Type
 
   // Terms
-  val z    = 'z
-  val succ = 'succ
-  val plus = 'plus
-  val prod = 'prod
-
-  z    :> i
-  succ :> i ->: i
-  plus :> i ->: i ->: i
-  prod :> i ->: i ->: i
+  val z    = 'z    :> i
+  val succ = 'succ :> i ->: i
+  val plus = 'plus :> i ->: i ->: i
+  val prod = 'prod :> i ->: i ->: i
 
   // Formulas
-  val eq     = 'eq
-  val less   = 'less
-  val not    = 'not
-  val or     = 'or
-  val and    = 'and
-  val forall = 'forall
-  val exists = 'exists
-  val impl   = 'impl
-
-  eq     :> i ->: i ->: o
-  less   :> i ->: i ->: o
-  not    :> o ->: o
-  or     :> o ->: o ->: o
-  and    :> o ->: o ->: o
-  forall :> (i ->: o) ->: o
-  exists :> (i ->: o) ->: o
-  impl   :> o ->: o ->: o
+  val eq     = 'eq     :> i ->: i ->: o
+  val less   = 'less   :> i ->: i ->: o
+  val not    = 'not    :> o ->: o
+  val or     = 'or     :> o ->: o ->: o
+  val and    = 'and    :> o ->: o ->: o
+  val forall = 'forall :> (i ->: o) ->: o
+  val exists = 'exists :> (i ->: o) ->: o
+  val impl   = 'impl   :> o ->: o ->: o
 
   // Rules (judgements)
-  val tru = 'tru
-  val raa = 'raa
-  val imp_i = 'imp_i
-
   val p = 'p; val q = 'q
-
-  tru :> o ->: Type
+  val tru = 'tru :> o ->: Type
 
   // "reductio ad absurdum" rule
-
-  raa :> !!(p, o)/ {tru ( not ( not (p) )) ->: (tru (p))}
+  val raa = 'raa :> !!(p, o)/ {tru ( not ( not (p) )) ->: (tru (p))}
 
   // "Implication introduction" rule
-  imp_i :> !!(p, o) (q, o)/ { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
+  val imp_i = 'imp_i :> !!(p, o) (q, o)/
+                        { (tru(p) ->: tru(q)) ->: tru(impl(p)(q)) }
 
   // TODO: add remaining rules
 
 }
-
-
-
-

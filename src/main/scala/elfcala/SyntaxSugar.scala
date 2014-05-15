@@ -13,14 +13,14 @@ trait SyntaxSugar {
     val b = FamilyBinding(Constant(s), k)
     familyConstants = familyConstants + s
     bindings = bindings :+ b
-    b
+    s
   }
 
   def bindObject(s: Symbol)(a: Family) = {
     val b = ObjectBinding(Constant(s), a)
     objectConstants = objectConstants + s
     bindings = bindings :+ b
-    b
+    s
   }
 
 
