@@ -1,9 +1,9 @@
-package elfcala
+package elfcala.examples.twelf
 
 import elfcala.twelf._
-import LogicalFramework.Kind.Type
+import elfcala.LogicalFramework.Kind.Type
 
-trait TwelfExample extends TwelfSignature {
+trait TwelfNaturals extends TwelfSignature {
   // Variable names to use in expressions
   val n = 'N; val n1 = 'N1; val n2 = 'N2; val n3 = 'N3;
   val d = 'D; val d1 = 'D1; val d2 = 'D2;

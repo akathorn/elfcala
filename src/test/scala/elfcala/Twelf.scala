@@ -3,6 +3,7 @@ package elfcala
 import org.scalatest._
 
 import elfcala._
+import elfcala.examples.twelf._
 import elfcala.examples._
 import elfcala.twelf._
 
@@ -34,7 +35,7 @@ class TwelfTests extends FunSuite with Signature {
 
   test("Twelf totality test (naturals with proofs)") {
     assertResult(true) {
-      TwelfCheck(new TwelfExample {})
+      TwelfCheck(new TwelfNaturals {})
     }
   }
 

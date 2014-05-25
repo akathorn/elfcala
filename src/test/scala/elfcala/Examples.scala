@@ -47,5 +47,6 @@ class ExamplesTests extends FunSuite with Signature {
       Typecheck(new FullLists {})
     }
   }
+
 }
 
