@@ -21,13 +21,13 @@ class TwelfTests extends FunSuite with Signature {
     }
   }
 
-  test("Twelf test (naturals)") {
+  test("Twelf naturals") {
     assertResult(true) {
       TwelfCheck(new Naturals {})
     }
   }
 
-  test("Twelf test (naturals with proofs)") {
+  test("Twelf naturals with proofs") {
     assertResult(true) {
       TwelfCheck(new PlusSRightInc with PlusZRightNeutral {})
     }
@@ -39,9 +39,15 @@ class TwelfTests extends FunSuite with Signature {
     }
   }
 
-  test("Twelf test (lists)") {
+  test("Twelf lists") {
     assertResult(true) {
       TwelfCheck(new FullLists {})
+    }
+  }
+
+  test("Twelf repetitions") {
+    assertResult(true) {
+      TwelfCheck(new Repetitions {})
     }
   }
 
