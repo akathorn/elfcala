@@ -3,22 +3,24 @@ package elfcala
 import scala.language.implicitConversions
 import LogicalFramework._
 
-trait SyntaxSugar {
+trait SyntaxSugar extends elfcala.macros.SignatureMacros {
   var bindings: List[SignatureBinding]
   var familyConstants: Set[Symbol] = Set.empty
   var objectConstants: Set[Symbol] = Set.empty
 
 
-  def bindFamily(s: Symbol)(k: Kind) = {
-    val b = FamilyBinding(Constant(s), k)
+  def bind(name: String, k: Kind): Symbol = {
+    val s = Symbol(name)
     familyConstants = familyConstants + s
+    val b = FamilyBinding(Constant(s), k)
     bindings = bindings :+ b
     s
   }
 
-  def bindObject(s: Symbol)(a: Family) = {
-    val b = ObjectBinding(Constant(s), a)
+  def bind(name: String, a: Family): Symbol = {
+    val s = Symbol(name)
     objectConstants = objectConstants + s
+    val b = ObjectBinding(Constant(s), a)
     bindings = bindings :+ b
     s
   }
@@ -43,9 +45,6 @@ trait SyntaxSugar {
 
   // Binders
   case class SymbolBinder(s: Symbol) {
-    def :>(k: Kind)   = bindFamily(s)(k)
-    def :>(a: Family) = bindObject(s)(a)
-
     def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, s)
 
     def apply(o: Symbol): Application = SymbolApplication(s, o)
