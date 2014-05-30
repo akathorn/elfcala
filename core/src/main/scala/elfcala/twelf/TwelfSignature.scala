@@ -19,6 +19,8 @@ case class Total(x: Object, a: Family, args: List[Object])
 
 
 trait TwelfSignature extends Signature {
+  val ? = '_
+
   def %(b: TwelfSignatureBinding) = {
     bindings = bindings :+ b
     b
