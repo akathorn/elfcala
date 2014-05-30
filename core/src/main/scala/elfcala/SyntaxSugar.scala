@@ -43,12 +43,37 @@ trait SyntaxSugar extends elfcala.macros.SignatureMacros {
 
   // Syntax sugaring
 
+  abstract class Argument
+  case class SymbolArg(s: Symbol) extends Argument
+  case class ObjectArg(m: Object) extends Argument
+  case class ApplicationArg(a: Application) extends Argument
+
+  implicit def symbolToArg(s: Symbol): Argument = SymbolArg(s)
+  implicit def objectToArg(m: Object): Argument = ObjectArg(m)
+  implicit def applicationToArg(a: Application): Argument = ApplicationArg(a)
+
   // Binders
   case class SymbolBinder(s: Symbol) {
     def ->:(o: Family) = Family.Pi(Variable(Name.fresh("x")), o, s)
 
-    def apply(o: Symbol): Application = SymbolApplication(s, o)
+    def apply(args: Argument*): Application = args.toList match {
+      case SymbolArg(h) :: Nil =>
+        this(h)
+      case SymbolArg(h) :: rest =>
+        this(h) (rest:_*)
+      case ObjectArg(h) :: Nil =>
+        this(h)
+      case ObjectArg(h) :: rest =>
+        this(h) (rest:_*)
+      case ApplicationArg(h) :: Nil =>
+        this(h)
+      case ApplicationArg(h) :: rest =>
+        this(h) (rest:_*)
+      case _ =>
+        throw new Exception("Invalid argument")
+    }
 
+    def apply(o: Symbol): Application = SymbolApplication(s, o)
     def apply(o: Object): Application = SymbolApplication(s, o)
     def apply(o: Application): Application =
       SymbolApplication(s, applicationToObject(o))
@@ -115,6 +140,22 @@ trait SyntaxSugar extends elfcala.macros.SignatureMacros {
   abstract class Application {
     def ->:(o: Family): Family
 
+    def apply(args: Argument*): Application = args.toList match {
+      case SymbolArg(h) :: Nil =>
+        this(h)
+      case SymbolArg(h) :: rest =>
+        this(h) (rest:_*)
+      case ObjectArg(h) :: Nil =>
+        this(h)
+      case ObjectArg(h) :: rest =>
+        this(h) (rest:_*)
+      case ApplicationArg(h) :: Nil =>
+        this(h)
+      case ApplicationArg(h) :: rest =>
+        this(h) (rest:_*)
+      case _ =>
+        throw new Exception("Invalid argument")
+    }
     def apply(s: Symbol): AppApplication
     def apply(o: Object): AppApplication
   }

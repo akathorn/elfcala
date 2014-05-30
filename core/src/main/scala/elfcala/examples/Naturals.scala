@@ -16,9 +16,9 @@ trait Naturals extends Signature {
   val s   = |{ nat ->: nat }
 
   val plus   = |{ nat ->: nat ->: nat ->: Type }
-  val plus_z = |{ !!(n, nat)/ { plus(z)(n)(n) } }
+  val plus_z = |{ !!(n, nat)/ { plus(z, n, n) } }
   val plus_s = |{ !!(n1, nat) (n2, nat) (n3, nat)/
-                   { plus(n1)(n2)(n3) ->: plus(s(n1))(n2)(s(n3)) } }
+                   { plus(n1, n2, n3) ->: plus(s(n1), n2, s(n3)) } }
 
 
 }
@@ -31,12 +31,12 @@ trait Even extends Naturals {
 
 // Some proofs
 trait PlusZRightNeutral extends Naturals {
-  val plus_z_right_neutral   = |{ !!(n, nat)/ { plus(n)(z)(n) ->: Type } }
-  val plus_z_right_neutral_z = |{ plus_z_right_neutral(z)(plus_z(z)) }
+  val plus_z_right_neutral   = |{ !!(n, nat)/ { plus(n, z, n) ->: Type } }
+  val plus_z_right_neutral_z = |{ plus_z_right_neutral(z, plus_z(z)) }
   val plus_z_right_neutral_s = |{
-    !!(n, nat) (d, plus(n)(z)(n))/
-      { plus_z_right_neutral (n) (d) ->:
-        plus_z_right_neutral (s(n)) ( (plus_s(n)(z)(n)) (d)) }
+    !!(n, nat) (d, plus(n, z, n))/
+      { plus_z_right_neutral (n, d) ->:
+        plus_z_right_neutral (s(n), (plus_s(n, z, n) (d))) }
   }
 
 }
@@ -44,17 +44,19 @@ trait PlusZRightNeutral extends Naturals {
 
 trait PlusSRightInc extends Naturals {
   val plus_s_right_inc = |{ !!(n1, nat) (n2, nat) (n3, nat)/
-                             { plus(n1)(n2)(n3) ->:
-                               plus(n1)(s(n2))(s(n3)) ->: Type } }
+                             { plus(n1, n2, n3) ->:
+                               plus(n1, s(n2), s(n3)) ->: Type } }
 
   val plus_s_right_inc_z = |{
-    !!(n, nat)/ { plus_s_right_inc(z)(n)(n) (plus_z(n)) (plus_z(s(n))) }
+    !!(n, nat)/ { plus_s_right_inc(z, n, n) (plus_z(n)) (plus_z(s(n))) }
   }
 
   val plus_s_right_inc_s = |{ !!(n1, nat) (n2, nat) (n3, nat)/ {
-                              !!(d1, plus(n1)(n2)(n3))/ {
-                              !!(d2, plus(n1)(s(n2))(s(n3)))/ {
-      plus_s_right_inc (n1)(n2)(n3) (d1) (d2) ->:
-      plus_s_right_inc (s(n1))(n2)(s(n3)) (plus_s(n1)(n2)(n3) (d1)) (plus_s(n1)(s(n2))(s(n3)) (d2))
+                              !!(d1, plus(n1, n2, n3))/ {
+                              !!(d2, plus(n1, s(n2), s(n3)))/ {
+      plus_s_right_inc (n1, n2, n3) (d1) (d2) ->:
+      plus_s_right_inc (s(n1), n2, s(n3),
+                        plus_s(n1, n2, n3) (d1),
+                        plus_s(n1, s(n2), s(n3)) (d2))
   } } } }
 }
