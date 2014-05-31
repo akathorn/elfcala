@@ -1,7 +1,6 @@
 package elfcala.examples.twelf
 
 import elfcala.twelf._
-import elfcala.examples.GenericList
 import elfcala.LogicalFramework._
 import elfcala.LogicalFramework.Kind.Type
 
@@ -10,6 +9,8 @@ import elfcala.PrettyPrinter
 
 trait Preliminaries extends TwelfSignature {
   // Natural numbers
+
+  // This is convenient to save typestrokes
   val N = 'N; val N1 = 'N1; val N2 = 'N2; val N3 = 'N3;
   val X = 'X; val A = 'A; val B = 'B; val C = 'C;
 
@@ -79,57 +80,54 @@ trait Preliminaries extends TwelfSignature {
 }
 
 
-trait Generics extends GenericList with Preliminaries {
-  // override def listOf(t: Family) = {
-  //   val (list, nil, cons) = super.listOf(t)
+trait Generics extends Preliminaries {
+  val L = 'L; val L1 = 'L1; val L2 = 'L2
 
-  //   val L = 'L; val L1 = 'L1; val L2 = 'L2;
+  // Generic list definition
+  val genericList = generic { t =>
+    val list = |{ Type }
+    val nil  = |{ list }
+    val cons = |{ t ->: list ->: list }
 
-  //   val list_size      = Symbol(PrettyPrinter(t) + "-list-size")
-  //   val list_size_nil  = Symbol(PrettyPrinter(t) + "-list-size/nil" )
-  //   val list_size_cons = Symbol(PrettyPrinter(t) + "-list-size/cons")
+    val list_size      = |{ list ->: nat ->: Type }
+    val list_size_nil  = |{ list_size (nil, z)  }
+    val list_size_cons = |{ list_size (L) (N) ->:
+                            list_size (cons (?, L), s(N)) }
 
-  //   list_size      :> list ->: nat ->: Type
-  //   list_size_nil  :> list_size (nil) (z)
-  //   list_size_cons :> list_size ('L) ('N) ->: list_size (cons (?) ('L)) (s('N))
+    val sub_list      = |{ list ->: list ->: Type }
+    val sub_list_nil  = |{ sub_list (L, L)  }
+    val sub_list_cons = |{ sub_list (L1) (L2) ->:
+                           sub_list (L1, cons(?, L2)) }
+  }
 
+  // Example of extending generics
+  val genericListProofs = generic { t =>
+    import genericList._
 
-  //   val sub_list     = Symbol("sub-" + PrettyPrinter(t) + "-list")
-  //   val sub_list_rfl = Symbol("sub-" + PrettyPrinter(t) + "-list/rfl" )
-  //   val sub_list_ext = Symbol("sub-" + PrettyPrinter(t) + "-list/ext")
-
-  //   sub_list     :> list ->: list ->: Type
-  //   sub_list_rfl :> sub_list (L) (L)
-  //   sub_list_ext :> sub_list (L1) (L2) ->: sub_list (L1) (cons (?) (L2))
-
-
-  //   val list_size_eq = Symbol(PrettyPrinter(t) + "-list-size-eq")
-
-  //   list_size_eq :> list_size (L) (N1) ->: list_size (L) (N2) ->: eq_nat (N1) (N2) ->: Type
-  //   % { mode (list_size_eq) ++(A) ++(B) --(C) }
-  //   '- :> list_size_eq (list_size_nil) (list_size_nil) (eq_nat_z)
-  //   '- :> list_size_eq ('S1) ('S2) ('EQ) ->:
-  //         list_size_eq (list_size_cons ('S1)) (list_size_cons ('S2)) (eq_nat_s ('EQ))
-  //   % { worlds (list_size_eq) (?) (?) (?) }
-  //   % { total (A) (list_size_eq) (A) (?) (?) }
-
-
-  //   val list_size_id = Symbol(PrettyPrinter(t) + "-list-size-id")
-
-  //   list_size_id :> list_size (L) (N1) ->: list_size (L) (N2) ->: id_nat (N1) (N2) ->: Type
-  //   % { mode (list_size_id) ++(A) ++(B) --(C) }
-  //   '- :> eq2id_nat ('EQ) ('ID) ->:
-  //         list_size_eq ('S1) ('S2) ('EQ) ->:
-  //         list_size_id ('S1) ('S2) ('ID)
-  //   % { worlds (list_size_id) (?) (?) (?) }
-  //   % { total (A) (list_size_id) (A) (?) (?) }
+    val list_size_eq = |{ list_size(t) (L) (N1) ->:
+                          list_size(t) (L) (N2) ->:
+                          eq_nat (N1) (N2) ->: Type }
+    % { mode (list_size_eq) ++(A) ++(B) --(C) }
+    val _1 = |{ list_size_eq (list_size_nil(t)) (list_size_nil(t)) (eq_nat_z) }
+    val _2 = |{ list_size_eq ('S1) ('S2) ('EQ) ->:
+         list_size_eq (list_size_cons(t) ('S1)) (list_size_cons(t) ('S2)) (eq_nat_s ('EQ)) }
+    % { worlds (list_size_eq) (?) (?) (?) }
+    % { total (A) (list_size_eq) (A) (?) (?) }
 
 
-  //   (list, nil, cons)
-  // }
+    val list_size_id = |{ list_size(t) (L) (N1) ->:
+                          list_size(t) (L) (N2) ->:
+                          id_nat (N1) (N2) ->: Type }
+    % { mode (list_size_id) ++(A) ++(B) --(C) }
+    val _3 = |{ eq2id_nat ('EQ) ('ID) ->:
+                list_size_eq ('S1) ('S2) ('EQ) ->:
+                list_size_id ('S1) ('S2) ('ID) }
+    % { worlds (list_size_id) (?) (?) (?) }
+    % { total (A) (list_size_id) (A) (?) (?) }
+  }
 
-  // listOf(nat)
-  // listOf(exp)
+  genericListProofs.list_size_id(nat)
+  genericListProofs.list_size_id(exp)
 }
 
 trait RecursiveExtensions extends Generics {
