@@ -70,22 +70,22 @@ object Macros {
     //           $bind (PrettyPrinter($param) + "_" + $name, $typedef)"""
     // }
 
-    val generic_function_defs = defs map { d =>
-      val q"val $valname = $bind ( $name, $typedef )" = d
-
-      q"""def $valname($param: Family) = {
-            if (!(defined contains $param)) {
-              define_family($param)
-            }
-            Symbol(PrettyPrinter($param) + "_" + $name)
-          }"""
+    val generic_function_defs = defs collect { d => d match {
+      case q"val $valname = $bind ( $name, $typedef )" =>
+        q"""def $valname($param: Family) = {
+              if (!(defined contains $param)) {
+                define_family($param)
+              }
+              Symbol(PrettyPrinter($param) + "_" + $name)
+            }"""
+      }
     }
 
     val trait_definition = q"""
       trait $genericName {
-        var defined: Set[Family] = Set.empty
+        private var defined: Set[Family] = Set.empty
 
-        def define_family($param: Family) = {
+        private def define_family($param: Family) = {
           ..$generic_defs
 
           defined = defined + $param
