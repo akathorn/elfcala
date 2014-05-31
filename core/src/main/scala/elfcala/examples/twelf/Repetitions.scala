@@ -1,7 +1,7 @@
 package elfcala.examples.twelf
 
 import elfcala.twelf._
-import elfcala.examples.LFList
+import elfcala.examples.GenericList
 import elfcala.LogicalFramework._
 import elfcala.LogicalFramework.Kind.Type
 
@@ -79,7 +79,7 @@ trait Preliminaries extends TwelfSignature {
 }
 
 
-trait Generics extends LFList with Preliminaries {
+trait Generics extends GenericList with Preliminaries {
   // override def listOf(t: Family) = {
   //   val (list, nil, cons) = super.listOf(t)
 
