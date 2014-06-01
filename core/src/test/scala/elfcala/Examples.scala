@@ -48,5 +48,11 @@ class ExamplesTests extends FunSuite with Signature {
     }
   }
 
+  test("Pairs example") {
+    assertResult(true) {
+      Typecheck(new Pairs {})
+    }
+  }
+
 }
 

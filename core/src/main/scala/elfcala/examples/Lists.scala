@@ -38,4 +38,7 @@ trait ListSize extends GenericList with Naturals {
 
 }
 
-trait FullLists extends ListSize with NatList with ExprList
+trait FullLists extends ListSize with NatList with ExprList {
+  listSize.list_size(nat)
+  listSize.list_size(exp)
+}

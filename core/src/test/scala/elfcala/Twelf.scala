@@ -45,6 +45,12 @@ class TwelfTests extends FunSuite with Signature {
     }
   }
 
+  test("Twelf Pairs") {
+    assertResult(true) {
+      TwelfCheck(new TwelfPairs {})
+    }
+  }
+
   test("Twelf repetitions") {
     assertResult(true) {
       TwelfCheck(new Repetitions {})
