@@ -33,15 +33,28 @@ object Macros {
 
     val genericName = TypeName(c.fresh("Generic"))
 
-    val Function(List(ValDef(_, oldparam, _, _)), Block(defs, _)) = decl
+    val Function(original_params, defs) = decl
 
-    val TermName(paramname) = oldparam
-    val param = TermName(paramname)
+    val original_params_names = original_params collect {
+      case ValDef(_, termname, _, _) =>
+        termname
+    }
+
+    val params = original_params_names collect {
+      case TermName(name) =>
+        // We have to create new copies, doesn't seem to work otherwise
+        TermName(name)
+    }
+    val params_with_types = params map { p => q"$p: Family" }
+
+    val pretty_names   = params map { n => q"PrettyPrinter($n)" }
+    val generic_prefix = q"""List(..$pretty_names).mkString("_")"""
 
     val definitionTransformer = new Transformer {
       // This actually implements a weird fix for a bug related to changing
       // value definitions
-      var ctx: Map[TermName, TermName] = Map.empty + (oldparam -> param)
+      var ctx: Map[TermName, TermName] =
+        (original_params_names zip params).toMap
 
       override def transform(tree: Tree): Tree = tree match {
         case ValDef(modifiers, valname, typ, q"$bind ( $name, $typedef )") =>
@@ -50,7 +63,7 @@ object Macros {
           ctx = ctx + (valname -> newname)
 
           val newval =
-            q"""$bind (PrettyPrinter($param) + "_" + $name, $typedef)"""
+            q"""$bind ($generic_prefix + "_" + $name, $typedef)"""
 
           super.transform(ValDef(modifiers, newname, typ, newval))
         case Ident(t: TermName) if (ctx contains t) =>
@@ -60,7 +73,7 @@ object Macros {
       }
     }
 
-    val generic_defs = definitionTransformer.transformTrees(defs)
+    val generic_defs = definitionTransformer.transform(defs)
 
     // // This should be the way to do this!
     // val generic_defs = defs map { d =>
@@ -72,23 +85,23 @@ object Macros {
 
     val generic_function_defs = defs collect { d => d match {
       case q"val $valname = $bind ( $name, $typedef )" =>
-        q"""def $valname($param: Family) = {
-              if (!(defined contains $param)) {
-                define_family($param)
+        q"""def $valname(..$params_with_types) = {
+              if (!(defined contains List(..$params))) {
+                define_family(..$params)
               }
-              Symbol(PrettyPrinter($param) + "_" + $name)
+              Symbol($generic_prefix + "_" + $name)
             }"""
       }
     }
 
     val trait_definition = q"""
       trait $genericName {
-        private var defined: Set[Family] = Set.empty
+        private var defined: Set[List[Family]] = Set.empty
 
-        private def define_family($param: Family) = {
+        private def define_family(..$params_with_types) = {
           ..$generic_defs
 
-          defined = defined + $param
+          defined = defined + List(..$params)
         }
 
         ..$generic_function_defs
