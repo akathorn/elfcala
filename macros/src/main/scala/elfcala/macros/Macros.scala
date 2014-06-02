@@ -19,7 +19,7 @@ object Macros {
       if (line.contains("=")) {
         line.split("=").head.split(" ").last
       } else {
-        "undefined"
+        c.fresh("undefined")
       }
 
     val bind = Select(c.prefix.tree, newTermName("bind"))
@@ -103,6 +103,11 @@ object Macros {
 
           defined = defined + List(..$params)
         }
+
+        def apply(..$params_with_types) =
+          if (!(defined contains List(..$params))) {
+            define_family(..$params)
+          }
 
         ..$generic_function_defs
       }"""
