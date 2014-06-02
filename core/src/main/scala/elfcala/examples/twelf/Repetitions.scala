@@ -60,15 +60,15 @@ trait Preliminaries extends TwelfSignature {
   val id2eq_nat = |{ id_nat (N1) (N2) ->: eq_nat (N1) (N2) ->: Type }
   % { mode (id2eq_nat) ++(A) --(B) }
 
-  val _1 = |{ eq_nat_rfl (?) ('EQ) ->: id2eq_nat (id_nat_rfl) ('EQ) }
+  |{ eq_nat_rfl (?) ('EQ) ->: id2eq_nat (id_nat_rfl) ('EQ) }
   % { worlds (id2eq_nat) (?) (?) }
   % { total (A) (id2eq_nat) (A) (?) }
 
   val add_inc = |{ add (A) (B) (C) ->: add (A) (s (B)) (s (C)) ->: Type }
   % { mode (add_inc) ++('E1) --('E2) }
 
-  val _2 = |{ add_inc (add_z) (add_z) }
-  val _3 = |{ add_inc (A) (B) ->: add_inc (add_s (A)) (add_s (B)) }
+  |{ add_inc (add_z) (add_z) }
+  |{ add_inc (A) (B) ->: add_inc (add_s (A)) (add_s (B)) }
   % { worlds (add_inc) (?) (?) }
   % { total (A) (add_inc) (A) (?) }
 
@@ -94,10 +94,10 @@ trait Generics extends Preliminaries {
     val list_size_cons = |{ list_size (L) (N) ->:
                             list_size (cons (?, L), s(N)) }
 
-    val sub_list      = |{ list ->: list ->: Type }
-    val sub_list_nil  = |{ sub_list (L, L)  }
-    val sub_list_cons = |{ sub_list (L1) (L2) ->:
-                           sub_list (L1, cons(?, L2)) }
+    val sub_list     = |{ list ->: list ->: Type }
+    val sub_list_rfl = |{ sub_list (L, L)  }
+    val sub_list_ext = |{ sub_list (L1) (L2) ->:
+                          sub_list (L1, cons(?, L2)) }
   }
 
   // Example of extending generics
@@ -108,8 +108,8 @@ trait Generics extends Preliminaries {
                           list_size(t) (L) (N2) ->:
                           eq_nat (N1) (N2) ->: Type }
     % { mode (list_size_eq) ++(A) ++(B) --(C) }
-    val _1 = |{ list_size_eq (list_size_nil(t)) (list_size_nil(t)) (eq_nat_z) }
-    val _2 = |{ list_size_eq ('S1) ('S2) ('EQ) ->:
+    |{ list_size_eq (list_size_nil(t)) (list_size_nil(t)) (eq_nat_z) }
+    |{ list_size_eq ('S1) ('S2) ('EQ) ->:
          list_size_eq (list_size_cons(t) ('S1)) (list_size_cons(t) ('S2)) (eq_nat_s ('EQ)) }
     % { worlds (list_size_eq) (?) (?) (?) }
     % { total (A) (list_size_eq) (A) (?) (?) }
@@ -119,35 +119,139 @@ trait Generics extends Preliminaries {
                           list_size(t) (L) (N2) ->:
                           id_nat (N1) (N2) ->: Type }
     % { mode (list_size_id) ++(A) ++(B) --(C) }
-    val _3 = |{ eq2id_nat ('EQ) ('ID) ->:
-                list_size_eq ('S1) ('S2) ('EQ) ->:
-                list_size_id ('S1) ('S2) ('ID) }
+    |{ eq2id_nat ('EQ) ('ID) ->:
+       list_size_eq ('S1) ('S2) ('EQ) ->:
+       list_size_id ('S1) ('S2) ('ID) }
     % { worlds (list_size_id) (?) (?) (?) }
     % { total (A) (list_size_id) (A) (?) (?) }
   }
 
-  genericListProofs.list_size_id(nat)
-  genericListProofs.list_size_id(exp)
+  genericListProofs(nat)
+  genericListProofs(exp)
 }
 
 trait RecursiveExtensions extends Generics {
-  // The generics trait has already generated the declarations for nat-list,
-  // but they are not bound to any scala variable. We can bind the names
-  // manually:
-  // val nat_list_size      = Symbol("nat-list-size")
-  // val nat_list_size_nil  = Symbol("nat-list-size/nil" )
-  // val nat_list_size_cons = Symbol("nat-list-size/cons")
-  // val sub_nat_list       = Symbol("sub-nat-list")
-  // val sub_nat_list_rfl   = Symbol("sub-nat-list/rfl" )
-  // val sub_nat_list_ext   = Symbol("sub-nat-list/ext")
-  // val nat_list_size_eq   = Symbol("nat-list-size-eq")
-  // val nat_list_size_id   = Symbol("nat-list-size-id")
+  val G = 'G; val I0 = 'I0; val I = 'I; val Z = 'Z
+  val S1 = 'S1; val S2 = 'S2;
+
+  import genericList._
+
+  // Note that we could have all generic definitions enclosed in the same
+  // block, sharing the same parameter t. That would be more practical, but to
+  // ilustrate how we can incrementaly extend generic definitions in this
+  // example the definitions are split in smaller blocks.
+
+  val lookUp = generic { t =>
+    val lkp0      = |{ list(t) ->: nat ->: t ->: Type }
+    val lkp0_hit  = |{ lkp0 (cons(t)(X)(G)) (z) (X) }
+    val lkp0_miss = |{ lkp0 (G) (I0) (X) ->:
+                       lkp0 (cons(t)(?)(G)) (s(I0)) (X) }
+
+    val lkp     = |{ list(t) ->: nat ->: t ->: Type }
+    val lkp_rev = |{ lkp0 (G) (I0) (X) ->:
+                     add (s(I)) (I0) (N) ->: // I0=N-1-I
+                     list_size(t) (G) (N) ->:
+                     lkp (G) (I) (X) }
+  }
+
+  val listIncSize = generic { t =>
+    val list_size_inc = |{ list_size(t) (L) (N) ->:
+                         !!(Z, t)/ { list_size(t) (cons(t) (Z) (L)) (s (N)) ->:
+                         Type } }
+
+    % { mode (list_size_inc) ++(A) ++(Z) --(B) }
+    |{ list_size_inc (list_size_nil(t)) (?) (list_size_cons(t) (list_size_nil(t))) }
+    |{ list_size_inc (A) (?) (B) ->:
+       list_size_inc (list_size_cons(t) (A)) (?) (list_size_cons(t) (B)) }
+    % { worlds (list_size_inc) (?) (?) (?) }
+    % { total (A) (list_size_inc) (A) (?) (?) }
+  }
 
 
+  val extLookUp = generic { t =>
+    import lookUp._
+    import listIncSize._
+
+    val shift_lkp0 = |{ lkp0(t) (G) (I0) (X) ->:
+                       !!(Z, t)/ { lkp0(t) (cons(t) (Z) (G)) (s (I0)) (X) ->:
+                       Type }}
+
+    % { mode (shift_lkp0) ++(A) ++(Z) --(B) }
+    |{ shift_lkp0 (lkp0_hit(t)) (?) (lkp0_miss(t) (lkp0_hit(t))) }
+    |{ shift_lkp0 (A) (?) (B) ->:
+       shift_lkp0 (lkp0_miss(t) (A)) (?) (lkp0_miss(t) (B)) }
+    % { worlds (shift_lkp0) (?) (?) (?) }
+    % { total (A) (shift_lkp0) (A) (?) (?) }
 
 
+    val ext_lkp = |{ lkp(t) (G) (I) (X) ->:
+                    !!(Z, t)/ { lkp(t) (cons(t) (Z) (G)) (I) (X) ->: Type } }
+    % { mode (ext_lkp) ++(A) ++(Z) --(B) }
+    |{ shift_lkp0 (L1) (Z) (L2) ->:
+       add_inc (A) (B) ->:
+       list_size_inc(t) (S1) (Z) (S2) ->:
+       ext_lkp (lkp_rev(t) (L1) (A) (S1)) (Z) (lkp_rev(t) (L2) (B) (S2)) }
+    % { worlds (ext_lkp) (?) (?) (?) }
+    % { total (A) (ext_lkp) (A) (?) (?) }
+  }
+
+
+  import lookUp._
+  import extLookUp._
+
+  val E1 = 'E1; val E2 = 'E2; val E3 = 'E3; val E4 = 'E4; val V = 'V
+
+  val ev     = |{ list(nat) ->: exp ->: nat ->: Type }
+  val ev_cst = |{ ev (G) (cst (N)) (N) }
+  val ev_var = |{ lkp(nat) (G) (I) (N) ->: ev (G) (vaR (I)) (N) }
+  val ev_pls = |{ add (N1) (N2) (N) ->:
+                  ev (G) (E2) (N2) ->:
+                  ev (G) (E1) (N1) ->:
+                  ev (G) (pls (E1) (E2)) (N) }
+
+  val ext_ev = |{ ev (G) (I) (V) ->:
+                 !!(Z, nat)/ { ev (cons(nat) (Z) (G)) (I) (V) ->: Type } }
+  % { mode (ext_ev) ++(A) ++(Z) --(B) }
+  |{ ext_ev (ev_cst) (?) (ev_cst) }
+  |{ ext_lkp(nat) (L1) (?) (L2) ->:
+     ext_ev (ev_var (L1)) (?) (ev_var (L2)) }
+  |{ ext_ev (E2) (?) (E4) ->:
+     ext_ev (E1) (?) (E3) ->:
+     ext_ev (ev_pls (A) (E2) (E1)) (?) (ev_pls (A) (E4) (E3)) }
+
+  % { worlds (ext_ev) (?) (?) (?) }
+  % { total (A) (ext_ev) (A) (?) (?) }
+
+
+  extLookUp(nat)
+  extLookUp(exp)
+
+
+  val G2 = 'G2; val G1 = 'G1; val B0 = 'B0; val S = 'S
+  val recursiveExtension = generic { (rel, ext, envtype) =>
+    val exts = |{ rel (G1) (I) (X) ->: sub_list(envtype) (G1) (G2) ->:
+                  rel (G2) (I) (X) ->: Type }
+    % { mode (exts) ++(A) ++(S) --(B) }
+    |{ exts (A) (sub_list_rfl(envtype)) (A) }
+    |{ ext (B0) (?) (B) ->:
+       exts (A) (S) (B0) ->:
+       exts (A) (sub_list_ext(envtype) (S)) (B) }
+
+    % { worlds (exts) (?) (?) (?) }
+    % { total (S) (exts) (?) (S) (?) }
+  }
+
+
+  recursiveExtension(lkp(nat), ext_lkp(nat), nat)
+  recursiveExtension(ev, ext_ev, nat)
+
+  // Bonus example!
+  // Prove it for environments containing lists of lists of expressions.
+  // Why? Because we can, of course!
+  recursiveExtension(lkp(list(list(exp))),
+                     ext_lkp(list(list(exp))),
+                     list(list(exp)))
 }
 
 
-trait Repetitions extends RecursiveExtensions {
-}
+trait Repetitions extends RecursiveExtensions
