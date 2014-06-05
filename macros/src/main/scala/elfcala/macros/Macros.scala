@@ -33,55 +33,24 @@ object Macros {
 
     val genericName = TypeName(c.fresh("Generic"))
 
-    val Function(original_params, defs) = decl
+    val Function(params_def, defs) = c.resetLocalAttrs(decl)
 
-    val original_params_names = original_params collect {
+    val params = params_def collect {
       case ValDef(_, termname, _, _) =>
         termname
     }
 
-    val params = original_params_names collect {
-      case TermName(name) =>
-        // We have to create new copies, doesn't seem to work otherwise
-        TermName(name)
-    }
     val params_with_types = params map { p => q"$p: Family" }
-
     val pretty_names   = params map { n => q"PrettyPrinter($n)" }
     val generic_prefix = q"""List(..$pretty_names).mkString("_")"""
 
-    val definitionTransformer = new Transformer {
-      // This actually implements a weird fix for a bug related to changing
-      // value definitions
-      var ctx: Map[TermName, TermName] =
-        (original_params_names zip params).toMap
-
-      override def transform(tree: Tree): Tree = tree match {
-        case ValDef(modifiers, valname, typ, q"$bind ( $name, $typedef )") =>
-          val TermName(name_str) = valname
-          val newname = TermName(name_str)
-          ctx = ctx + (valname -> newname)
-
-          val newval =
-            q"""$bind ($generic_prefix + "_" + $name, $typedef)"""
-
-          super.transform(ValDef(modifiers, newname, typ, newval))
-        case Ident(t: TermName) if (ctx contains t) =>
-           super.transform(Ident(ctx(t)))
-        case other =>
-          super.transform(other)
-      }
-    }
-
-    val generic_defs = definitionTransformer.transform(defs)
-
-    // // This should be the way to do this!
-    // val generic_defs = defs map { d =>
-    //   val q"val $valname = $bind ( $name, $typedef )" = d
-
-    //   q"""val $valname =
-    //           $bind (PrettyPrinter($param) + "_" + $name, $typedef)"""
-    // }
+    val Block(b1, b2) = defs
+    val generic_defs = Block(b1 map {
+      case q"val $valname = $bind ( $name, $typedef )" =>
+        q"""val $valname = $bind ($generic_prefix + "_" + $name, $typedef)"""
+      case other =>
+        other
+    }, b2)
 
     val generic_function_defs = defs collect { d => d match {
       case q"val $valname = $bind ( $name, $typedef )" =>
@@ -120,6 +89,7 @@ object Macros {
       new $genericName {}
     """
 
-    c.resetLocalAttrs(generic_definition)
+    generic_definition
   }
 }
+
