@@ -1,10 +1,12 @@
-package elfcala.examples
+package elfcala.examples.twelf
 
-import elfcala._
-import LogicalFramework._
-import LogicalFramework.Kind.Type
 
-trait TwelfPairs extends Signature with Naturals with Expressions {
+import elfcala.examples._
+import elfcala.twelf._
+import elfcala.LogicalFramework._
+import elfcala.LogicalFramework.Kind.Type
+
+trait TwelfPairs extends TwelfSignature with Naturals with Expressions {
   val pairsGeneric =
     generic { (u, v) =>
       val pair      = |{ Type }

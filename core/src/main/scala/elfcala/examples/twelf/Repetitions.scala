@@ -154,6 +154,8 @@ trait RecursiveExtensions extends Generics {
                      lkp (G) (I) (X) }
   }
 
+  import lookUp._
+
   val listIncSize = generic { t =>
     val list_size_inc = |{ list_size(t) (L) (N) ->:
                          !!(Z, t)/ { list_size(t) (cons(t) (Z) (L)) (s (N)) ->:
@@ -167,11 +169,9 @@ trait RecursiveExtensions extends Generics {
     % { total (A) (list_size_inc) (A) (?) (?) }
   }
 
+  import listIncSize._
 
   val extLookUp = generic { t =>
-    import lookUp._
-    import listIncSize._
-
     val shift_lkp0 = |{ lkp0(t) (G) (I0) (X) ->:
                        !!(Z, t)/ { lkp0(t) (cons(t) (Z) (G)) (s (I0)) (X) ->:
                        Type }}
@@ -196,7 +196,6 @@ trait RecursiveExtensions extends Generics {
   }
 
 
-  import lookUp._
   import extLookUp._
 
   val E1 = 'E1; val E2 = 'E2; val E3 = 'E3; val E4 = 'E4; val V = 'V
@@ -221,10 +220,6 @@ trait RecursiveExtensions extends Generics {
 
   % { worlds (ext_ev) (?) (?) (?) }
   % { total (A) (ext_ev) (A) (?) (?) }
-
-
-  extLookUp(nat)
-  extLookUp(exp)
 
 
   val G2 = 'G2; val G1 = 'G1; val B0 = 'B0; val S = 'S

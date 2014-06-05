@@ -113,6 +113,8 @@ object Macros {
       }"""
 
     val generic_definition = q"""
+      import elfcala.PrettyPrinter
+
       $trait_definition
 
       new $genericName {}

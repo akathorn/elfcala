@@ -19,7 +19,7 @@ trait Pairs extends Signature with Naturals with Expressions {
                         { snd('A, 'B) (pair_cons('A,'B), 'B) } }
     }
 
-  pairsGeneric.pair(nat, exp)
-  pairsGeneric.pair(nat, nat)
-  pairsGeneric.pair(exp, exp)
+  pairsGeneric(nat, exp)
+  pairsGeneric(nat, nat)
+  pairsGeneric(exp, exp)
 }
